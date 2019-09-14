@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """
-check the security and functionability of uploaded codez
+check the security and functionability of uploaded code
 - forbid from importing os
 - random chessboard check
 - some special case check
 """
-import importlib
+import imp
 import traceback
 import sys
 import os
@@ -74,8 +74,13 @@ class CodeCheck():
     def __check_result(self, chessboard, result):
         if not self.__check_go(chessboard):
             return False
-        if not self.agent.candidate_list or list(self.agent.candidate_list[-1]) not in result:
+        if not self.agent.candidate_list or \
+            list(self.agent.candidate_list[-1]) not in result:
+            print("your result",self.agent.candidate_list[-1])
+            print("the answer",result)
             return False
+        print("your result",self.agent.candidate_list[-1])
+        print("the answer",result)
         return True
 
     def __check_simple_chessboard(self):
