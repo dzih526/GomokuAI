@@ -3,7 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="c5cbbf5a-2bcf-4336-8087-430a83960238" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/code_check_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/code_check_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gomoku.py" beforeDir="false" afterPath="$PROJECT_DIR$/gomoku.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sample.txt" beforeDir="false" afterPath="$PROJECT_DIR$/sample.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -48,7 +50,14 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.completion" />
+  </component>
+  <component name="PyConsoleOptionsProvider">
+    <option name="myPythonConsoleState">
+      <console-settings>
+        <option name="useSoftWraps" value="true" />
+      </console-settings>
+    </option>
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -62,7 +71,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.code_check_test">
+  <component name="RunManager" selected="Python.gomoku">
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
       <Port>5050</Port>
@@ -115,6 +124,9 @@
       <module name="GomokuAI" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
       <option name="SDK_HOME" value="" />
       <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
       <option name="IS_MODULE_SDK" value="true" />
@@ -202,8 +214,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.code_check_test" />
         <item itemvalue="Python.gomoku" />
+        <item itemvalue="Python.code_check_test" />
         <item itemvalue="Python.learnpython3" />
         <item itemvalue="Python.code_check" />
         <item itemvalue="Python.numpy_excercise" />
@@ -224,7 +236,8 @@
       <workItem from="1568192326361" duration="23777000" />
       <workItem from="1568337260954" duration="42391000" />
       <workItem from="1568477549735" duration="10000" />
-      <workItem from="1568477619532" duration="27171000" />
+      <workItem from="1568477619532" duration="27335000" />
+      <workItem from="1568617168483" duration="3836000" />
     </task>
     <servers />
   </component>
@@ -249,18 +262,8 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/gomoku.py</url>
-          <line>101</line>
-          <option name="timeStamp" value="168" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/gomoku.py</url>
-          <line>106</line>
-          <option name="timeStamp" value="179" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/gomoku.py</url>
-          <line>109</line>
-          <option name="timeStamp" value="180" />
+          <line>107</line>
+          <option name="timeStamp" value="181" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -25,8 +25,14 @@ class AI(object):
         # You need add your decision into your candidate_list. System will get the end of your candidate_list as your decision .
         self.candidate_list = []
 # The input is current chessboard.
+    def __printscoretable(self,scoretable):
+        for line in scoretable:
+            for element in line:
+                print(repr(element).rjust(10),end=' ')
+            print()
 
-#calculate octonumber, which helps to judge the pattern
+
+    #calculate octonumber, which helps to judge the pattern
     def __inbound(self,pos):
         a=pos[0][0]
         b=pos[1][0]
@@ -98,7 +104,7 @@ class AI(object):
             #x is a tuple presenting position of vacant point
             #eight directions octo[which direction 0-7]={neighbor(-1 op or bo,0 vacant,1 fri),succession,border}
             octo=[[],[]]
-            if(x[0]==6 and x[1]==2):
+            if(x[0]==3 and x[1]==2):
                 asdfwef=10
             for i in range(8):
                 for color in [0,1]:
@@ -114,7 +120,7 @@ class AI(object):
                         ((octo[color][i+4]['neighbor']==0 and octo[color][i+4]['succ']==0 and octo[color][i+4]['border']!=-1 and octo[color][i+4]['outter']==0)or octo[color][i+4]['neighbor']==-2)):
                         continue
                     #2 huosi,chongsi
-                    if (octo[color][i]['succ'] + octo[color][i+4]['succ']>=4):
+                    if ((octo[color][i]['neighbor']==1 or octo[color][i+4]==1) and octo[color][i]['succ'] + octo[color][i+4]['succ']>=4):
                         scoretable[x]+=SCORE[SCORE_LEVEL-color]
                         continue
                     #3 huosan(lian)
@@ -188,7 +194,7 @@ class AI(object):
 
 
         print("scoretable")
-        print(scoretable)
+        self.__printscoretable(scoretable)
         #
         return (scoretable)
 
@@ -219,13 +225,34 @@ class AI(object):
         assert chessboard[new_pos[0],new_pos[1]]== COLOR_NONE
         #Add your decision into candidate_list, Records the chess board
         self.candidate_list.append(new_pos)
-# if __name__ == '__main__':
-#     chessboard = np.zeros((15,15), dtype=np.int)
-#     chessboard[2:5, 2] = 1
-#     chessboard[6, 3:5] = 1
-#     chessboard[1, 10:12] = -1
-#     chessboard[2, 10] = -1
-#     chessboard[4, 12:14] = -1
-#     agent=AI(15,-1,5)
-#     agent.go(chessboard)
-#     print(agent.candidate_list)
+def readchessboard(filename,backstep):
+    file = open(filename)
+    str = file.readlines()
+    chessboard = np.zeros((15,15), dtype=np.int)
+    for pos in str[:-backstep]:
+        t=st=0
+        chess=[]
+        while st < len(pos):
+            if pos[st].isnumeric():
+                flag=1
+                if st-1>=0 and pos[st-1]=='-':
+                    flag=-1
+                if st+2<=len(pos) and pos[st:st+2].isnumeric():
+                    chess.append(flag*int(pos[st:st+2]))
+                    st+=3
+                else:
+                    chess.append(flag*int(pos[st]))
+                    st+=2
+                t+=1
+            else:
+                st+=1
+        chessboard[chess[0],chess[1]]=chess[2]
+    return chessboard
+
+if __name__ == '__main__':
+    chessboard = np.zeros((15,15), dtype=np.int)
+    # chessboard = readchessboard("testcase/chess_log.txt",2)
+    chessboard[5][5:8]=1
+    agent=AI(15,-1,5)
+    agent.go(chessboard)
+    print(agent.candidate_list)
