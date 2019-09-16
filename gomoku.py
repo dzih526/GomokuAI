@@ -227,6 +227,27 @@ class AI(object):
             self.candidate_list.append((self.chessboard_size//2,self.chessboard_size//2))
             return
         #Not empty
+
+        idx = np.where(chessboard != COLOR_NONE)
+        idx = list(zip(idx[0], idx[1]))
+        ""
+        if len(idx)==2:
+            me = np.where(chessboard == self.color)
+            opponent = np.where(chessboard == -self.color)
+            a=opponent[0][0]-me[0][0]
+            b=opponent[1][0]-me[1][0]
+            if a==0:
+                x=0
+                y=b
+            else:
+                y=int(((a**4+(a**2)*b**2)/(a**2+b**2))**(1/2))
+                x=int(b*y/a)
+                if (a*x+b*y!=0):
+                    x=-x
+            if chessboard[me[0][0]+int(x)][me[1][0]+int(y)]==COLOR_NONE:
+                self.candidate_list.append((me[0][0]+x,me[1][0]+y))
+                return
+
         scoretable=self.__score(chessboard)
         new_pos = list(zip(*(np.where(scoretable == np.max(scoretable)))))[0]
         self.indent=np.math.log(10+np.max(scoretable),10)
@@ -266,8 +287,10 @@ def readchessboard(filename,backstep):
     return chessboard
 
 if __name__ == '__main__':
-    # chessboard = np.zeros((15,15), dtype=np.int)
-    chessboard = readchessboard("testcase/chess_log9.txt",6)
+    chessboard = np.zeros((15,15), dtype=np.int)
+    # chessboard = readchessboard("testcase/chess_log9.txt",6)
+    chessboard[7][7]=-1
+    chessboard[8][8]=1
     agent=AI(15,-1,5)
     agent.go(chessboard)
     print(agent.candidate_list)
