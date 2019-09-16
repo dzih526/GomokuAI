@@ -3,9 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="c5cbbf5a-2bcf-4336-8087-430a83960238" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/code_check_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/code_check_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gomoku.py" beforeDir="false" afterPath="$PROJECT_DIR$/gomoku.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sample.txt" beforeDir="false" afterPath="$PROJECT_DIR$/sample.txt" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -50,7 +48,7 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
-    <property name="settings.editor.selected.configurable" value="editor.preferences.completion" />
+    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="PyConsoleOptionsProvider">
     <option name="myPythonConsoleState">
@@ -237,7 +235,9 @@
       <workItem from="1568337260954" duration="42391000" />
       <workItem from="1568477549735" duration="10000" />
       <workItem from="1568477619532" duration="27335000" />
-      <workItem from="1568617168483" duration="3836000" />
+      <workItem from="1568617168483" duration="9529000" />
+      <workItem from="1568627508099" duration="502000" />
+      <workItem from="1568628038420" duration="6959000" />
     </task>
     <servers />
   </component>
@@ -262,20 +262,26 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/gomoku.py</url>
-          <line>107</line>
-          <option name="timeStamp" value="181" />
+          <line>120</line>
+          <option name="timeStamp" value="213" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/gomoku.py</url>
+          <line>127</line>
+          <option name="timeStamp" value="217" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
     <watches-manager>
       <configuration name="PythonConfigurationType">
         <watch expression="whatever" />
+        <watch expression="scoretable" />
       </configuration>
     </watches-manager>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/GomokuAI$numpy_excercise.coverage" NAME="numpy_excercise Coverage Results" MODIFIED="1568339149730" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/GomokuAI$gomoku.coverage" NAME="gomoku Coverage Results" MODIFIED="1568514868371" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/GomokuAI$gomoku.coverage" NAME="gomoku Coverage Results" MODIFIED="1568646664574" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GomokuAI$code_check_test.coverage" NAME="code_check_test Coverage Results" MODIFIED="1568514773144" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
