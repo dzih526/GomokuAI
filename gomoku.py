@@ -10,7 +10,7 @@ SCORE_LEVEL=10
 SCORE = np.logspace(0,SCORE_LEVEL,SCORE_LEVEL+1,dtype=np.int64)
 #direction
 DIRECTION=((-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1))
-
+ITER=3
 
 random.seed(0)
 #don't change the class name
@@ -28,7 +28,7 @@ class AI(object):
     def __printscoretable(self,scoretable):
         for line in scoretable:
             for element in line:
-                print(repr(element).rjust(int(self.indent)+1),end=' ')
+                print(repr(element).rjust(int(self.indent)+5),end=' ')
             print()
     def __printchessboard(self,chessboard):
         print(" ",end=" ")
@@ -84,8 +84,8 @@ class AI(object):
                     while (self.__inbound(self.__nextpos(pos,drc,st+n+n2+1))and color==chessboard[self.__nextpos(pos,drc,st+n+n2+1)][0]):
                         n2+=1
                     octonumber['outter']=n2
-                    if (not self.__inbound(self.__nextpos(pos,drc,st+n+n2+1)) or
-                       (self.__nextpos(pos,drc,st+n+n2+1) and chessboard[self.__nextpos(pos,drc,st+n+n2+1)][0]==-1)):
+                    if ((not self.__inbound(self.__nextpos(pos,drc,st+n+n2+1)) )or
+                       (self.__inbound(self.__nextpos(pos,drc,st+n+n2+1)) and chessboard[self.__nextpos(pos,drc,st+n+n2+1)][0]==-color)):
                         octonumber['outter']=-octonumber['outter']
         else:
             octonumber['border']=-2#border: -1,border of board,opposite chess; 0, space; 1,space+1 fri; 2,2space;
@@ -102,9 +102,15 @@ class AI(object):
         if (octo['neighbor'] in condition[0] and octo['succ'] in condition[1] and octo['border'] in condition[2] and octo['outter'] in condition[3]):
             return True
         return False
+    def __numofchess(self,chessboard):
+        idx = np.where(chessboard != COLOR_NONE)
+        idx = list(zip(idx[0], idx[1]))
+        return len(idx)
+    def __get2dimposition(self,pos1dim):
+        return ((pos1dim//self.chessboard_size,pos1dim%self.chessboard_size))
 
 # score the empty position on the board
-    def __score(self,chessboard):
+    def __score(self, chessboard, thecolor, aspect=0): ##aspect: 0 for differ chess, 1 for differ chessboard
         idx = np.where(chessboard != COLOR_NONE)
         # initiate score table
         scoretable = np.zeros((self.chessboard_size,self.chessboard_size),dtype=np.int64)
@@ -117,16 +123,17 @@ class AI(object):
             #x is a tuple presenting position of vacant point
             #eight directions octo[which direction 0-7]={neighbor(-1 op or bo,0 vacant,1 fri),succession,border}
             octo=[[],[]]
-            if(x[0]==11 and x[1]==3):
+            if(x[0]==3 and x[1]==6):
                 asdfwef=10
             for i in range(8):
                 for color in [0,1]:
-                    octo[color].append(self.__octonumber(chessboard,(-2*color+1)*self.color,x,i))
+                    octo[color].append(self.__octonumber(chessboard,(-2*color+1)*thecolor,x,i))
                     # single direction win judge(huo4 chong4 huo3)
             whatever=[-1,0,1,2,3,4,5,-1,-2,-3,-4,-5]
-            for color in [0,1]:
+            for color in [0,1]:#0 for attack, 1 for guardian
                 numhuoer=nummiansan=0
                 normalsucc=0
+                switch=1 if (aspect==1 and color==1) else 0
                 for i in range(4):
                     #1
                     if (((octo[color][i]['neighbor']==0 and octo[color][i]['succ']==0 and octo[color][i]['border']!=-1 and octo[color][i]['outter']==0) or octo[color][i]['neighbor']==-2) and
@@ -136,22 +143,22 @@ class AI(object):
                     if ((octo[color][i]['neighbor']==1 and octo[color][i+4]['neighbor']==1 and octo[color][i]['succ'] + octo[color][i+4]['succ']>=4)or
                        ((octo[color][i]['neighbor']==1 and octo[color][i]['succ']==4)or
                         (octo[color][i+4]['neighbor']==1 and octo[color][i+4]['succ']==4))):
-                        scoretable[x]+=SCORE[SCORE_LEVEL-color]
+                        scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color+switch]
                         continue
                     #3 huosan(lian)
                     if ((octo[color][i]['neighbor']==0 and octo[color][i+4]['neighbor']==1 and octo[color][i+4]['border']>=0 and octo[color][i+4]['succ']==3) or
                         (octo[color][i+4]['neighbor']==0 and octo[color][i]['neighbor']==1 and octo[color][i]['border']>=0 and octo[color][i]['succ']==3)):
-                        scoretable[x]+=SCORE[SCORE_LEVEL-color-2]
+                        scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
                         continue
                     #4 huosan(tiao)
                     if (octo[color][i]['border']>=0 and octo[color][i+4]['border']>=0 and
                         octo[color][i]['neighbor']==octo[color][i+4]['neighbor']==1 and
                         octo[color][i]['succ']+octo[color][i+4]['succ']==3):
-                        scoretable[x]+=SCORE[SCORE_LEVEL-color-2]
+                        scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
                         continue
 
                     #5 huoer 1
-                    if (self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],[0,2],whatever],[[1],[2],[2],whatever]) or
+                    if (self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],[0,2],whatever],[[1],[2],[0,2],whatever]) or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],whatever,whatever],[[0],[2],[0,2],whatever])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[2],whatever],[[1],[1],[2],whatever]) or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],whatever,whatever],[[1],[1],[0],[1]]) or
@@ -177,8 +184,7 @@ class AI(object):
                         self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[-1,-2],whatever],[[1],[1],[0],[1,-1]])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[-1,-2],whatever],[[0],[1],whatever,whatever])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[3],[-1,-2],whatever],[whatever,whatever,whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[2,-2]],[[0],[0],whatever,whatever]) or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[0],[2],whatever,whatever],[[1],[1],whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[2,-2]],[[0],[0],whatever,whatever]) or                        self.__octojudger(octo[color][i],octo[color][i+4],[[0],[2],whatever,whatever],[[1],[1],whatever,whatever])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[3],whatever,whatever],[whatever,whatever,whatever,whatever])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],whatever,whatever],[[0],[1],whatever,whatever])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[1,-1]],[[1],[1],whatever,whatever])or
@@ -196,21 +202,57 @@ class AI(object):
                             normalsucc+=1
 
                 if (numhuoer+nummiansan>=1.9 and nummiansan>=0.9):
-                    scoretable[x]+=SCORE[SCORE_LEVEL-color-2]
+                    scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
                 elif(numhuoer>=1.9 and nummiansan==0):
-                    scoretable[x]+=SCORE[SCORE_LEVEL-color-4]
+                    scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-4+switch]
                 elif(nummiansan==0 or numhuoer==0):
-                    scoretable[x]+=(numhuoer+nummiansan)*SCORE[SCORE_LEVEL-color-6]
+                    scoretable[x]+=(switch*(-2)+1)*(numhuoer+nummiansan)*SCORE[SCORE_LEVEL-color-6+switch]
 
                 if (normalsucc<10 and normalsucc>=1):
-                    scoretable[x]+=normalsucc*SCORE[SCORE_LEVEL-color-8]
+                    scoretable[x]+=(switch*(-2)+1)*normalsucc*SCORE[SCORE_LEVEL-color-8+switch]
                 elif(normalsucc>=10):
-                    scoretable[x]+=9*SCORE[SCORE_LEVEL-color-8]
+                    scoretable[x]+=(switch*(-2)+1)*9*SCORE[SCORE_LEVEL-color-8+switch]
 
 
 
         #
         return (scoretable)
+    def __scorechessboard(self,chessboard,thecolor):
+        return np.sum(self.__score(chessboard,thecolor,1))
+    def __statecompare(self,state1,state2,thecolor):
+        if ((state1['state']==state2['state']=='win' and state1['color']==-thecolor and state2['color']==thecolor)or
+            (state1['state']==state2['state']=='win' and state1['color']==state2['color']==-thecolor and state1['iter']<state2['iter'])or
+            (state1['state']==state2['state']=='win' and state1['color']==state2['color']==-thecolor and state1['iter']==state2['iter'] and state1['score']<state2['score'])or
+            (state1['state']=='win' and state1['color']==-thecolor and state2['state']=='ongo')or
+            (state1['state']==state2['state']=='ongo' and state1['score']>state2['score'])or
+            (state2['state']=='win' and state2['color']==thecolor and state1['state']=='ongo')):
+            return True
+
+    def __minmaxdecision(self,chessboard,thecolor,iter):
+        max={'state':'win','color':thecolor,'score':-SCORE[SCORE_LEVEL],'iter':ITER+1}
+        scoretable = self.__score(chessboard,-thecolor)
+        pos1dim = np.argsort(-scoretable.reshape((1,self.chessboard_size**2))[0])
+        pos = self.__get2dimposition(pos1dim[0])
+        if (scoretable[pos]>=SCORE[SCORE_LEVEL] or iter+1>=ITER):
+            if iter==0:
+                self.candidate_list.append(pos)
+            return ({'state':'win','color':-thecolor,'score':self.__scorechessboard(chessboard,-thecolor),'iter':iter+1})
+        else:
+            t = 0
+            while (iter+1 < ITER and t<=len(pos1dim)-1 and t<4 and scoretable[pos]>0):
+                # print(iter,pos)
+                ghostchessboard = chessboard.copy()
+                ghostchessboard[pos]=-thecolor
+                result=self.__minmaxdecision(ghostchessboard,thecolor,iter+1)
+                if (self.__statecompare(result,max,thecolor)):
+                    max=result
+                    if iter==0:
+                        self.candidate_list.append(pos)
+                t+=1
+                pos=self.__get2dimposition(pos1dim[t])
+            return ({'state':'ongo','color':thecolor,'score':self.__scorechessboard(chessboard,-thecolor),'iter':ITER+1})
+
+
 
     def go(self, chessboard):
         # Clear candidate_list
@@ -227,7 +269,7 @@ class AI(object):
             self.candidate_list.append((self.chessboard_size//2,self.chessboard_size//2))
             return
         #Not empty
-
+        #At the early game------puyue
         idx = np.where(chessboard != COLOR_NONE)
         idx = list(zip(idx[0], idx[1]))
         ""
@@ -248,20 +290,20 @@ class AI(object):
                 self.candidate_list.append((me[0][0]+x,me[1][0]+y))
                 return
 
-        scoretable=self.__score(chessboard)
-        new_pos = list(zip(*(np.where(scoretable == np.max(scoretable)))))[0]
-        self.indent=np.math.log(10+np.max(scoretable),10)
-        print("scoretable")
-        self.__printscoretable(scoretable)
+        #min max
 
 
+        self.__minmaxdecision(chessboard,-self.color,0)
+        # self.indent=np.math.log(10+np.max(scoretable),10)
+        # print("scoretable")
+        # self.__printscoretable(scoretable)
 
         #==============Find new pos========================================
         # Make sure that the position of your decision in chess board is empty.
         #If not, return error.
-        assert chessboard[new_pos[0],new_pos[1]]== COLOR_NONE
+        # assert chessboard[self.candidate_list[-1][0],self.candidate_list[-1][1]]== COLOR_NONE
+        print(self.candidate_list)
         #Add your decision into candidate_list, Records the chess board
-        self.candidate_list.append(new_pos)
 def readchessboard(filename,backstep):
     file = open(filename)
     str = file.readlines()
@@ -288,9 +330,8 @@ def readchessboard(filename,backstep):
 
 if __name__ == '__main__':
     chessboard = np.zeros((15,15), dtype=np.int)
-    # chessboard = readchessboard("testcase/chess_log9.txt",6)
-    chessboard[7][7]=-1
-    chessboard[8][8]=1
-    agent=AI(15,-1,5)
+    chessboard = readchessboard("testcase/chess_log12.txt",2)
+    # chessboard[6][5:9]=1
+    agent=AI(15,1,5)
     agent.go(chessboard)
     print(agent.candidate_list)
