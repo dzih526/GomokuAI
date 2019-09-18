@@ -8,7 +8,7 @@ def main():
     else:
         print('pass')
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
 
 

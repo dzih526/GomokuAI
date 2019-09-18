@@ -1,16 +1,17 @@
 import numpy as np
 import random
-# from time import *
+from time import *
 
 COLOR_BLACK=-1
 COLOR_WHITE=1
 COLOR_NONE=0
 #score parameter
-SCORE_LEVEL=10
+SCORE_LEVEL=12
 SCORE = np.logspace(0,SCORE_LEVEL,SCORE_LEVEL+1,dtype=np.int64)
 #direction
 DIRECTION=((-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1))
-ITER=3
+ITER=4
+LEVEL=4
 
 random.seed(0)
 #don't change the class name
@@ -24,7 +25,7 @@ class AI(object):
         # self.time_out = time_out
         # You need add your decision into your candidate_list. System will get the end of your candidate_list as your decision .
         self.candidate_list = []
-        self.ab=[[-10*SCORE[SCORE_LEVEL]]]*ITER
+        self.ab=[-10*SCORE[SCORE_LEVEL]]*ITER
 # The input is current chessboard.
     def __printscoretable(self,scoretable):
         for line in scoretable:
@@ -32,19 +33,22 @@ class AI(object):
                 print(repr(element).rjust(int(self.indent)+5),end=' ')
             print()
     def __printchessboard(self,chessboard):
-        print(" ",end=" ")
+        print("  ",end=" ")
         for i in range(len(chessboard)):
-            print(i,end=' ')
+            if i<10:
+                print(i,end='  ')
+            else:
+                print(i,end=' ')
         print()
         for i in range(len(chessboard)):
-            print(i,end=' ')
+            print(i,end='  ')
             for j in range(len(chessboard[0])):
                 if(chessboard[i][j]==-self.color):
-                    print(0,end=' ')
+                    print(0,end='  ')
                 elif (chessboard[i][j]==self.color):
-                    print(1,end=' ')
+                    print(1,end='  ')
                 else:
-                    print(" ",end=" ")
+                    print("  ",end=" ")
             print()
     #calculate octonumber, which helps to judge the pattern
     def __inbound(self,pos):
@@ -134,6 +138,7 @@ class AI(object):
             for color in [0,1]:#0 for attack, 1 for guardian
                 numhuoer=nummiansan=0
                 normalsucc=0
+                useless=0
                 switch=1 if (aspect==1 and color==1) else 0
                 for i in range(4):
                     #1
@@ -201,6 +206,10 @@ class AI(object):
                             normalsucc+=2
                         elif (self.__octojudger2(octo[color][i+j],[[0],[0],[2],[1]])):
                             normalsucc+=1
+                        else:
+                            useless+=1 if octo[color][i+j]['neighbor']==1 else 0
+
+
 
                 if (numhuoer+nummiansan>=1.9 and nummiansan>=0.9):
                     scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
@@ -213,6 +222,8 @@ class AI(object):
                     scoretable[x]+=(switch*(-2)+1)*normalsucc*SCORE[SCORE_LEVEL-color-8+switch]
                 elif(normalsucc>=10):
                     scoretable[x]+=(switch*(-2)+1)*9*SCORE[SCORE_LEVEL-color-8+switch]
+                elif(normalsucc == nummiansan == 0):
+                    scoretable[x]+=(switch*(-2)+1)*useless*SCORE[SCORE_LEVEL-color-10+switch]
 
 
 
@@ -226,8 +237,11 @@ class AI(object):
             (state1['state']==state2['state']=='win' and state1['color']==state2['color']==-thecolor and state1['iter']==state2['iter'] and state1['score']<state2['score'])or
             (state1['state']=='win' and state1['color']==-thecolor and state2['state']=='ongo')or
             (state1['state']==state2['state']=='ongo' and state1['score']>state2['score'])or
-            (state2['state']=='win' and state2['color']==thecolor and state1['state']=='ongo')):
+            (state2['state']=='win' and state2['color']==thecolor and state1['state']=='ongo')or
+            (state1['state']=='ongo' and state2['state']=='win' and state2['color']==thecolor)or
+            (state1['state']==state2['state']=='win' and state1['color']==state2['color']==thecolor and state1['score']>state2['score'])):
             return True
+        return False
 
     def __minmaxdecision(self,chessboard,thecolor,iter):
         max={'state':'win','color':thecolor,'score':-20*SCORE[SCORE_LEVEL],'iter':ITER+1}
@@ -235,18 +249,23 @@ class AI(object):
         # print("________",self.__scorechessboard(chessboard,-thecolor),self.__scorechessboard(chessboard,thecolor))
         pos1dim = np.argsort(-scoretable.reshape((1,self.chessboard_size**2))[0])
         pos = self.__get2dimposition(pos1dim[0])
+        # if (pos[0]==3 and pos[1]==11):
+        #     asfsd=1232
+        # print(chessboard)
         if (scoretable[pos]>=SCORE[SCORE_LEVEL] or iter+1>=ITER):
+            # self.__printchessboard(chessboard)
             if iter==0:
                 self.candidate_list.append(pos)
-                self.ab[iter]=self.__scorechessboard(chessboard,-thecolor)
-            return ({'state':'win','color':-thecolor,'score':self.ab[iter],'iter':iter+1})
+            # self.ab[iter]=self.__scorechessboard(chessboard,-thecolor)
+            state='win' if scoretable[pos]>=SCORE[SCORE_LEVEL] else 'ongo'
+            return ({'state':state,'color':-thecolor,'score':self.ab[iter],'iter':iter+1})
         else:
             t = 0
-            while (iter+1 < ITER and t<=len(pos1dim)-1 and t<4 and scoretable[pos]>0):
+            while (iter+1 < ITER and t<=len(pos1dim)-1 and t<LEVEL and scoretable[pos]>0):
                 # print(iter,pos)
                 ghostchessboard = chessboard.copy()
                 ghostchessboard[pos]=-thecolor
-                result=self.__minmaxdecision(ghostchessboard,thecolor,iter+1)
+                result=self.__minmaxdecision(ghostchessboard,-thecolor,iter+1)
                 #ABjian zhi
                 if (iter>1 and (-result['score']*(self.color*thecolor))<self.ab[iter-1]):
                     continue
@@ -257,15 +276,15 @@ class AI(object):
                         self.candidate_list.append(pos)
                 t+=1
                 pos=self.__get2dimposition(pos1dim[t])
-            return ({'state':'ongo','color':thecolor,'score':self.__scorechessboard(chessboard,-thecolor),'iter':ITER+1})
+            return (max)
 
 
 
     def go(self, chessboard):
         # Clear candidate_list
         self.candidate_list.clear()
-        print("chessboard")
-        self.__printchessboard(chessboard)
+        # print("chessboard")
+        # self.__printchessboard(chessboard)
         #==================================================================
         #Write your algorithm here
         #Here is the simplest sample:Random decision
@@ -301,6 +320,7 @@ class AI(object):
 
 
         self.__minmaxdecision(chessboard,-self.color,0)
+        print(self.candidate_list)
         # self.indent=np.math.log(10+np.max(scoretable),10)
         # print("scoretable")
         # self.__printscoretable(scoretable)
@@ -311,11 +331,12 @@ class AI(object):
         # assert chessboard[self.candidate_list[-1][0],self.candidate_list[-1][1]]== COLOR_NONE
 
         #Add your decision into candidate_list, Records the chess board
-def readchessboard(filename,backstep):
+def readchessboard(filename,backstep=0):
     file = open(filename)
     str = file.readlines()
     chessboard = np.zeros((15,15), dtype=np.int)
-    for pos in str[:-backstep]:
+    tail=None if backstep==0 else -backstep
+    for pos in str[:tail]:
         t=st=0
         chess=[]
         while st < len(pos):
@@ -335,14 +356,11 @@ def readchessboard(filename,backstep):
         chessboard[chess[0],chess[1]]=chess[2]
     return chessboard
 
-# if __name__ == '__main__':
-#     begin_time=time()
-#     chessboard = np.zeros((15,15), dtype=np.int)
-#     # chessboard = readchessboard("testcase/chess_log8.txt",4)
-#     chessboard[6][5:9]=1
-#     chessboard[6][4]=-1
-#     agent=AI(15,1,5)
-#     agent.go(chessboard)
-#     print(agent.candidate_list)
-#     end_time=time()
-#     print(end_time-begin_time)
+if __name__ == '__main__':
+    begin_time=time()
+    chessboard = readchessboard("testcase/chess_log14.txt")
+    agent=AI(15,1,5)
+    agent.go(chessboard)
+    print(agent.candidate_list)
+    end_time=time()
+    print(end_time-begin_time)
