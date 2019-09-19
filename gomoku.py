@@ -6,12 +6,12 @@ COLOR_BLACK=-1
 COLOR_WHITE=1
 COLOR_NONE=0
 #score parameter
-SCORE_LEVEL=12
+SCORE_LEVEL=10
 SCORE = np.logspace(0,SCORE_LEVEL,SCORE_LEVEL+1,dtype=np.int64)
 #direction
 DIRECTION=((-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1))
-ITER=2
-LEVEL=4
+ITER=5
+LEVEL=2
 
 random.seed(0)
 #don't change the class name
@@ -42,7 +42,10 @@ class AI(object):
                 print(i,end=' ')
         print()
         for i in range(len(chessboard)):
-            print(i,end='  ')
+            if i<=9:
+                print(i,end='  ')
+            else:
+                print(i,end='')
             for j in range(len(chessboard[0])):
                 if(chessboard[i][j]==-self.color):
                     print(0,end='  ')
@@ -133,7 +136,7 @@ class AI(object):
             #x is a tuple presenting position of vacant point
             #eight directions octo[which direction 0-7]={neighbor(-1 op or bo,0 vacant,1 fri),succession,border}
             octo=[[],[]]
-            if(x[0]==3 and x[1]==6):
+            if(x[0]==13 and x[1]==8):
                 asdfwef=10
             for i in range(8):
                 for color in [0,1]:
@@ -144,6 +147,9 @@ class AI(object):
                 numhuoer=nummiansan=0
                 normalsucc=0
                 useless=0
+                nummianer=0
+                nummianyi=0
+                numhuoyi=0
                 switch=1 if (aspect==1 and color==1) else 0
                 for i in range(4):
                     #1
@@ -165,11 +171,11 @@ class AI(object):
                         octo[color][i]['succ']+octo[color][i+4]['succ']==3):
                         scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
                     #5 huoer 1
-                    elif (self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],[0,2],whatever],[[1],[2],[0,2],whatever]) or
+                    elif (self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],whatever,whatever],[[1],[2],[0,2],whatever]) or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],whatever,whatever],[[0],[2],[0,2],whatever])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[2],whatever],[[1],[1],[2],whatever]) or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],whatever,whatever],[[1],[1],[0],[1]]) or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0,2],whatever],[[0],[1],[0,2],whatever])
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0,2,-1,-2],whatever],[[0],[1],[0,2],whatever])
                         ):
                         numhuoer+=1+(octo[color][i]['neighbor']+octo[color][i+4]['neighbor'])*0.01
 
@@ -198,20 +204,25 @@ class AI(object):
                         self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[0],[1,-1]],[whatever,whatever,whatever,whatever])):
                         nummiansan+=1+(octo[color][i]['neighbor']+octo[color][i+4]['neighbor'])*0.01
 
-                    for j in [0,4]:
-                        if (self.__octojudger2(octo[color][i+j],[[1],[1],[2],whatever])):
-                            normalsucc+=4
-                        elif (self.__octojudger2(octo[color][i+j],[[0],[1],[2],whatever])):
-                            normalsucc+=3
-                        elif (self.__octojudger2(octo[color][i+j],[[0],[0],[0],[1]])):
-                            normalsucc+=2
-                        elif (self.__octojudger2(octo[color][i+j],[[0],[0],[2],[1]])):
-                            normalsucc+=1
-                        else:
-                            useless+=1 if octo[color][i+j]['neighbor']==1 else 0
-
-
-
+                    if (self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],[2],whatever],[[-1],[0],whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[-1],whatever],[[1],[1],[2],whatever]) or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[-1],[0],whatever,whatever],[[1],[2],[2],whatever])):
+                        nummianer+=1
+                    elif (self.__octojudger(octo[color][i],octo[color][i+4],[[-1],[0],whatever,whatever],[[0],[0],[2],whatever])):
+                        nummianyi+=1
+                    elif (self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[2],whatever],[[0],[0],whatever,whatever])):
+                        numhuoyi+=1
+                    # for j in [0,4]:
+                    #     if (self.__octojudger2(octo[color][i+j],[[1],[1],[2],whatever])):
+                    #         normalsucc+=4
+                    #     elif (self.__octojudger2(octo[color][i+j],[[0],[1],[2],whatever])):
+                    #         normalsucc+=3
+                    #     elif (self.__octojudger2(octo[color][i+j],[[0],[0],[0],[1]])):
+                    #         normalsucc+=2
+                    #     elif (self.__octojudger2(octo[color][i+j],[[0],[0],[2],[1]])):
+                    #         normalsucc+=1
+                    #     else:
+                    #         useless+=1 if octo[color][i+j]['neighbor']==1 else 0
                 if (numhuoer+nummiansan>=1.9 and nummiansan>=0.9):
                     scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
                 elif(numhuoer>=1.9 and nummiansan==0):
@@ -219,12 +230,17 @@ class AI(object):
                 elif(nummiansan==0 or numhuoer==0):
                     scoretable[x]+=(switch*(-2)+1)*(numhuoer+nummiansan)*SCORE[SCORE_LEVEL-color-6+switch]
 
-                if (normalsucc<10 and normalsucc>=1):
-                    scoretable[x]+=(switch*(-2)+1)*normalsucc*SCORE[SCORE_LEVEL-color-8+switch]
-                elif(normalsucc>=10):
-                    scoretable[x]+=(switch*(-2)+1)*9*SCORE[SCORE_LEVEL-color-8+switch]
-                elif(normalsucc == nummiansan == 0):
-                    scoretable[x]+=(switch*(-2)+1)*useless*SCORE[SCORE_LEVEL-color-10+switch]
+                scoretable[x]+=(switch*(-2)+1)*((numhuoyi+nummianer)*SCORE[SCORE_LEVEL-color-8+switch]+nummianyi*SCORE[SCORE_LEVEL-color-10+switch])
+
+
+
+
+            # if (normalsucc<10 and normalsucc>=1):
+                #     scoretable[x]+=(switch*(-2)+1)*normalsucc*SCORE[SCORE_LEVEL-color-8+switch]
+                # elif(normalsucc>=10):
+                #     scoretable[x]+=(switch*(-2)+1)*9*SCORE[SCORE_LEVEL-color-8+switch]
+                # elif(normalsucc == nummiansan == 0):
+                #     scoretable[x]+=(switch*(-2)+1)*useless*SCORE[SCORE_LEVEL-color-10+switch]
 
 
 
@@ -246,6 +262,9 @@ class AI(object):
         scoretable = self.__score(chessboard,-thecolor)
         pos1dim = np.argsort(-scoretable.reshape((1,self.chessboard_size**2))[0])
         pos = self.__get2dimposition(pos1dim[0])
+        self.__printscoretable(scoretable)
+        self.candidate_list.append(pos)
+        return
         if (scoretable[pos]>=SCORE[SCORE_LEVEL] or iter>=ITER):
             # self.__printchessboard(chessboard)
             if iter==0:
@@ -355,16 +374,12 @@ def readchessboard(filename,backstep=0):
     return chessboard
 
 if __name__ == '__main__':
-    begin_time=time()
-    # chessboard = readchessboard("testcase/chess_log16_7_2_8.txt",7)
-    chessboard = np.zeros((15, 15), dtype=np.int)
-    chessboard[2:5, 2] = 1
-    chessboard[6, 3:5] = 1
-    chessboard[1, 10:12] = -1
-    chessboard[2, 10] = -1
-    chessboard[4, 12:14] = -1
-    agent=AI(15,-1,5)
+    # begin_time=time()
+    chessboard = readchessboard("testcase/chess_log_1_6_13_8.txt",6)
+    # chessboard = np.ones((15, 15))
+    # chessboard[:, ::2] = -1
+    # for i in range(0, 15, 4):
+    #     chessboard[i] = -chessboard[i]
+    # chessboard[3][5]=0
+    agent=AI(15,1,5)
     agent.go(chessboard)
-    print(agent.candidate_list)
-    end_time=time()
-    print(end_time-begin_time)

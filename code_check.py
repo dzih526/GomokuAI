@@ -41,9 +41,9 @@ class CodeCheck():
             return False
 
         # check simple condition
-        # if not self.__check_simple_chessboard():
-        #     self.errormsg = "Can not pass usability test."
-        #     return False
+        if not self.__check_simple_chessboard():
+            self.errormsg = "Can not pass usability test."
+            return False
 
         # check advance condition, online test contain more test case than this demo
         if not self.__check_advance_chessboard():
