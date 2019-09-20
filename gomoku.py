@@ -123,7 +123,7 @@ class AI(object):
         return ((pos1dim//self.chessboard_size,pos1dim%self.chessboard_size))
 
 # score the empty position on the board
-    def __score(self, chessboard, thecolor, aspect=0): ##aspect: 0 for differ chess, 1 for differ chessboard
+    def __score(self, chessboard, thecolor): ##aspect: 0 for differ chess, 1 for differ chessboard
         idx = np.where(chessboard != COLOR_NONE)
         borderAx=min(idx[0])
         borderBx=max(idx[0])
@@ -137,6 +137,7 @@ class AI(object):
         # print("vacancy")
         # print(vacancy)
         waytosuccess=[[],[]]
+        chessboardscore=0
         for x in vacancy:
             #x is a tuple presenting position of vacant point
             #eight directions octo[which direction 0-7]={neighbor(-1 op or bo,0 vacant,1 fri),succession,border}
@@ -157,7 +158,6 @@ class AI(object):
                 nummianer=0
                 nummianyi=0
                 numhuoyi=0
-                switch=1 if (aspect==1 and color==1) else 0
                 for i in range(4):
                     #1
                     if (((octo[color][i]['neighbor']==0 and octo[color][i]['succ']==0 and octo[color][i]['border']!=-1 and octo[color][i]['outter']==0) or octo[color][i]['neighbor']==-2) and
@@ -167,20 +167,23 @@ class AI(object):
                     if ((octo[color][i]['neighbor']==1 and octo[color][i+4]['neighbor']==1 and octo[color][i]['succ'] + octo[color][i+4]['succ']>=4)or
                        ((octo[color][i]['neighbor']==1 and octo[color][i]['succ']==4)or
                         (octo[color][i+4]['neighbor']==1 and octo[color][i+4]['succ']==4))):
-                        scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color+switch]
+                        scoretable[x]+=SCORE[SCORE_LEVEL-color]
+                        chessboardscore+=(color*(-2)+1)*SCORE[SCORE_LEVEL]
                         if x not in waytosuccess[color]:
                             waytosuccess[color].append(x)
                     #3 huosan(lian)
                     if ((octo[color][i]['neighbor']==0 and octo[color][i+4]['neighbor']==1 and octo[color][i+4]['border']>=0 and octo[color][i+4]['succ']==3) or
                         (octo[color][i+4]['neighbor']==0 and octo[color][i]['neighbor']==1 and octo[color][i]['border']>=0 and octo[color][i]['succ']==3)):
-                        scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
+                        scoretable[x]+=SCORE[SCORE_LEVEL-color-2]
+                        chessboardscore+=(color*(-2)+1)*SCORE[SCORE_LEVEL-2]
                         if x not in waytosuccess[color]:
                             waytosuccess[color].append(x)
                     #4 huosan(tiao)
                     elif (octo[color][i]['border']>=0 and octo[color][i+4]['border']>=0 and
                         octo[color][i]['neighbor']==octo[color][i+4]['neighbor']==1 and
                         octo[color][i]['succ']+octo[color][i+4]['succ']==3):
-                        scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
+                        scoretable[x]+=SCORE[SCORE_LEVEL-color-2]
+                        chessboardscore+=(color*(-2)+1)*SCORE[SCORE_LEVEL-2]
                         if x not in waytosuccess[color]:
                             waytosuccess[color].append(x)
                     #5 huoer 1
@@ -237,17 +240,21 @@ class AI(object):
                     #     else:
                     #         useless+=1 if octo[color][i+j]['neighbor']==1 else 0
                 if (numhuoer+nummiansan>=1.9 and nummiansan>=0.9):
-                    scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
+                    scoretable[x]+=SCORE[SCORE_LEVEL-color-2]
+                    chessboardscore+=(color*(-2)+1)*SCORE[SCORE_LEVEL-2]
                     if x not in waytosuccess[color]:
                         waytosuccess[color].append(x)
                 elif(numhuoer>=1.9 and nummiansan==0):
-                    scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-4+switch]
+                    scoretable[x]+=SCORE[SCORE_LEVEL-color-4]
+                    chessboardscore+=(color*(-2)+1)*SCORE[SCORE_LEVEL-4]
                     if x not in waytosuccess[color]:
                         waytosuccess[color].append(x)
                 elif(nummiansan==0 or numhuoer==0):
-                    scoretable[x]+=(switch*(-2)+1)*(numhuoer+nummiansan)*SCORE[SCORE_LEVEL-color-6+switch]
+                    scoretable[x]+=(numhuoer+nummiansan)*SCORE[SCORE_LEVEL-color-6]
+                    chessboardscore+=(color*(-2)+1)*SCORE[SCORE_LEVEL-6]
 
-                scoretable[x]+=(switch*(-2)+1)*((numhuoyi+nummianer)*SCORE[SCORE_LEVEL-color-8+switch]+nummianyi*SCORE[SCORE_LEVEL-color-10+switch])
+                scoretable[x]+=((numhuoyi+nummianer)*SCORE[SCORE_LEVEL-color-8]+nummianyi*SCORE[SCORE_LEVEL-color-10])
+                chessboardscore+=(color*(-2)+1)*((numhuoyi+nummianer)*SCORE[SCORE_LEVEL-8]+nummianyi*SCORE[SCORE_LEVEL-10])
         # for i in [0,1]:
         #     if len(waytosuccess[i])>1
 
@@ -263,11 +270,8 @@ class AI(object):
 
 
 
-        #
-        return (scoretable)
-    def __scorechessboard(self,chessboard,thecolor):
-        sum=np.sum(self.__score(chessboard,thecolor,1))+self.__numofchess(chessboard)
-        return (sum)
+        chessboardscore+=self.__numofchess(chessboard)
+        return ((scoretable,chessboardscore))
     def __statecompare(self,state1,state2,thecolor):
         t=thecolor*self.color #t=1 find max score,t=-1 find min score
         if ((t*state1['score']>=0.9*t*SCORE[SCORE_LEVEL] and t*state2['score']>=0.9*t*SCORE[SCORE_LEVEL] and state1['iter']<state2['iter'])or
@@ -281,7 +285,9 @@ class AI(object):
     def __minmaxdecision(self,chessboard,thecolor,iter,list):
         max={}
         flag=0
-        scoretable = self.__score(chessboard,-thecolor)
+        score = self.__score(chessboard,-thecolor)
+        scoretable=score[0]
+        scorechessboard=score[1]
         pos1dim = np.argsort(-scoretable.reshape((1,self.chessboard_size**2))[0])
         pos = self.__get2dimposition(pos1dim[0])
         # self.__printscoretable(scoretable)
@@ -291,12 +297,13 @@ class AI(object):
             # self.__printchessboard(chessboard)
             if iter==0:
                 self.candidate_list.append(pos)
-            return ({'score':self.__scorechessboard(chessboard,self.color),'iter':iter+1})
+            # return ({'score':self.__scorechessboard(chessboard,self.color),'iter':iter+1})
+            return ({'score':-scorechessboard*self.color*thecolor,'iter':iter+1})
         if (self.__numofspace(chessboard)==0):
             return ({'score':0,'iter':iter+1})
         else:
             t = 0
-            while (iter < ITER and t<=len(pos1dim)-1 and t<LEVEL):
+            while (iter < ITER and t<=len(pos1dim)-1 and t<LEVEL and scoretable[pos]>=0):
                 # print(iter,pos)
                 ghostchessboard = chessboard.copy()
                 ghostchessboard[pos]=-thecolor
@@ -407,9 +414,10 @@ if __name__ == '__main__':
     # begin_time=time()
     # chessboard = readchessboard("testcase/chess_log_1_6_13_8.txt",6)
     chessboard = np.ones((15, 15), dtype=np.int)
+
     chessboard[:, ::2] = -1
     for i in range(0, 15, 4):
         chessboard[i] = -chessboard[i]
-    chessboard[1, 10] = 0
+    chessboard[5, 8] = 0
     agent=AI(15,-1,5)
     agent.go(chessboard)

@@ -70,7 +70,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.gomoku">
+  <component name="RunManager" selected="Python.code_check_test">
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
       <Port>5050</Port>
@@ -207,8 +207,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.gomoku" />
         <item itemvalue="Python.code_check_test" />
+        <item itemvalue="Python.gomoku" />
         <item itemvalue="Python.code_check" />
         <item itemvalue="Python.learnpython3" />
         <item itemvalue="Python.numpy_excercise" />
@@ -237,7 +237,7 @@
       <workItem from="1568771521054" duration="36473000" />
       <workItem from="1568871933808" duration="3881000" />
       <workItem from="1568878868828" duration="1034000" />
-      <workItem from="1568892004350" duration="27868000" />
+      <workItem from="1568892004350" duration="29565000" />
     </task>
     <servers />
   </component>
@@ -267,7 +267,7 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/GomokuAI$numpy_excercise.coverage" NAME="numpy_excercise Coverage Results" MODIFIED="1568339149730" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/GomokuAI$gomoku.coverage" NAME="gomoku Coverage Results" MODIFIED="1568953137315" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/GomokuAI$gomoku.coverage" NAME="gomoku Coverage Results" MODIFIED="1568954671391" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GomokuAI$code_check_test.coverage" NAME="code_check_test Coverage Results" MODIFIED="1568938167126" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
