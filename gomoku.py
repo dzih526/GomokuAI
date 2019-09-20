@@ -10,7 +10,7 @@ SCORE_LEVEL=10
 SCORE = np.logspace(0,SCORE_LEVEL,SCORE_LEVEL+1,dtype=np.int64)
 #direction
 DIRECTION=((-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1))
-ITER=5
+ITER=6
 LEVEL=2
 
 random.seed(0)
@@ -125,6 +125,10 @@ class AI(object):
 # score the empty position on the board
     def __score(self, chessboard, thecolor, aspect=0): ##aspect: 0 for differ chess, 1 for differ chessboard
         idx = np.where(chessboard != COLOR_NONE)
+        borderAx=min(idx[0])
+        borderBx=max(idx[0])
+        borderAy=min(idx[1])
+        borderBy=max(idx[1])
         # initiate score table
         scoretable = np.zeros((self.chessboard_size,self.chessboard_size),dtype=np.int64)
         scoretable[idx]=-1
@@ -132,9 +136,12 @@ class AI(object):
         vacancy = list(zip(*np.where(chessboard == COLOR_NONE)))
         # print("vacancy")
         # print(vacancy)
+        waytosuccess=[[],[]]
         for x in vacancy:
             #x is a tuple presenting position of vacant point
             #eight directions octo[which direction 0-7]={neighbor(-1 op or bo,0 vacant,1 fri),succession,border}
+            if (x[0]<=borderAx-3 or x[0]>=borderBx+3 or x[1]>=borderBy+3 or x[1]<=borderAy-3):
+                continue
             octo=[[],[]]
             if(x[0]==13 and x[1]==8):
                 asdfwef=10
@@ -161,15 +168,21 @@ class AI(object):
                        ((octo[color][i]['neighbor']==1 and octo[color][i]['succ']==4)or
                         (octo[color][i+4]['neighbor']==1 and octo[color][i+4]['succ']==4))):
                         scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color+switch]
+                        if x not in waytosuccess[color]:
+                            waytosuccess[color].append(x)
                     #3 huosan(lian)
                     if ((octo[color][i]['neighbor']==0 and octo[color][i+4]['neighbor']==1 and octo[color][i+4]['border']>=0 and octo[color][i+4]['succ']==3) or
                         (octo[color][i+4]['neighbor']==0 and octo[color][i]['neighbor']==1 and octo[color][i]['border']>=0 and octo[color][i]['succ']==3)):
                         scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
+                        if x not in waytosuccess[color]:
+                            waytosuccess[color].append(x)
                     #4 huosan(tiao)
                     elif (octo[color][i]['border']>=0 and octo[color][i+4]['border']>=0 and
                         octo[color][i]['neighbor']==octo[color][i+4]['neighbor']==1 and
                         octo[color][i]['succ']+octo[color][i+4]['succ']==3):
                         scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
+                        if x not in waytosuccess[color]:
+                            waytosuccess[color].append(x)
                     #5 huoer 1
                     elif (self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],whatever,whatever],[[1],[2],[0,2],whatever]) or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],whatever,whatever],[[0],[2],[0,2],whatever])or
@@ -225,12 +238,18 @@ class AI(object):
                     #         useless+=1 if octo[color][i+j]['neighbor']==1 else 0
                 if (numhuoer+nummiansan>=1.9 and nummiansan>=0.9):
                     scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-2+switch]
+                    if x not in waytosuccess[color]:
+                        waytosuccess[color].append(x)
                 elif(numhuoer>=1.9 and nummiansan==0):
                     scoretable[x]+=(switch*(-2)+1)*SCORE[SCORE_LEVEL-color-4+switch]
+                    if x not in waytosuccess[color]:
+                        waytosuccess[color].append(x)
                 elif(nummiansan==0 or numhuoer==0):
                     scoretable[x]+=(switch*(-2)+1)*(numhuoer+nummiansan)*SCORE[SCORE_LEVEL-color-6+switch]
 
                 scoretable[x]+=(switch*(-2)+1)*((numhuoyi+nummianer)*SCORE[SCORE_LEVEL-color-8+switch]+nummianyi*SCORE[SCORE_LEVEL-color-10+switch])
+        # for i in [0,1]:
+        #     if len(waytosuccess[i])>1
 
 
 
@@ -247,24 +266,27 @@ class AI(object):
         #
         return (scoretable)
     def __scorechessboard(self,chessboard,thecolor):
-        return (np.sum(self.__score(chessboard,thecolor,1))+self.__numofchess(chessboard))
+        sum=np.sum(self.__score(chessboard,thecolor,1))+self.__numofchess(chessboard)
+        return (sum)
     def __statecompare(self,state1,state2,thecolor):
         t=thecolor*self.color #t=1 find max score,t=-1 find min score
-        if ((t*state1['score']>=t*SCORE[SCORE_LEVEL] and t*state2['score']>=t*SCORE[SCORE_LEVEL] and state1['iter']<state2['iter'])or
-            (t*state1['score']>t*state2['score']>=t*SCORE[SCORE_LEVEL] and state1['iter']==state2['iter']) or
-            (t*state1['score']>=t*SCORE[SCORE_LEVEL]>t*state2['score'])or
-            (t*SCORE[SCORE_LEVEL]>t*state1['score']>t*state2['score'])or
-            (t*SCORE[SCORE_LEVEL]>t*state1['score']==t*state2['score'] and state1['iter']<state2['iter'])):
+        if ((t*state1['score']>=0.9*t*SCORE[SCORE_LEVEL] and t*state2['score']>=0.9*t*SCORE[SCORE_LEVEL] and state1['iter']<state2['iter'])or
+            (t*state1['score']>t*state2['score']>=0.9*t*SCORE[SCORE_LEVEL] and state1['iter']==state2['iter']) or
+            (t*state1['score']>=t*0.9*SCORE[SCORE_LEVEL]>t*state2['score'])or
+            (t*0.9*SCORE[SCORE_LEVEL]>t*state1['score']>t*state2['score'] and t*state1['score']>-t*0.9*SCORE[SCORE_LEVEL])or
+            (t*0.9*SCORE[SCORE_LEVEL]>t*state1['score']==t*state2['score']>-t*0.9*SCORE[SCORE_LEVEL] and state1['iter']<state2['iter'])or
+            (t*state1['score']<=-t*0.9*SCORE[SCORE_LEVEL] and t*state2['score']<=-t*0.9*SCORE[SCORE_LEVEL] and state1['iter']>state2['iter'])):
             return True
         return False
-    def __minmaxdecision(self,chessboard,thecolor,iter):
-        max={'score':thecolor*self.color*10*SCORE[SCORE_LEVEL],'iter':ITER+1}
+    def __minmaxdecision(self,chessboard,thecolor,iter,list):
+        max={}
+        flag=0
         scoretable = self.__score(chessboard,-thecolor)
         pos1dim = np.argsort(-scoretable.reshape((1,self.chessboard_size**2))[0])
         pos = self.__get2dimposition(pos1dim[0])
-        self.__printscoretable(scoretable)
-        self.candidate_list.append(pos)
-        return
+        # self.__printscoretable(scoretable)
+        # self.candidate_list.append(pos)
+        # return
         if (scoretable[pos]>=SCORE[SCORE_LEVEL] or iter>=ITER):
             # self.__printchessboard(chessboard)
             if iter==0:
@@ -274,18 +296,26 @@ class AI(object):
             return ({'score':0,'iter':iter+1})
         else:
             t = 0
-            while (iter < ITER and t<=len(pos1dim)-1 and t<LEVEL and scoretable[pos]>0):
+            while (iter < ITER and t<=len(pos1dim)-1 and t<LEVEL):
                 # print(iter,pos)
                 ghostchessboard = chessboard.copy()
                 ghostchessboard[pos]=-thecolor
                 # self.__printchessboard(ghostchessboard)
-                result=self.__minmaxdecision(ghostchessboard,-thecolor,iter+1)
+                list.append(pos)
+                result=self.__minmaxdecision(ghostchessboard,-thecolor,iter+1,list)
+                # print(list,result)
+                list.remove(pos)
                 #ABjian zhi
                 # if (iter>1 and (-result['score']*(self.color*thecolor))<self.ab[iter-1]):
                 #     t+=1
                 #     pos=self.__get2dimposition(pos1dim[t])
                 #     continue
-                if (self.__statecompare(result,max,-thecolor)):
+                if flag==0:
+                    max=result
+                    flag=1
+                    if iter==0:
+                        self.candidate_list.append(pos)
+                elif (self.__statecompare(result,max,-thecolor)):
                     max=result
                     self.ab[iter]=max['score']
                     if iter==0:
@@ -334,7 +364,7 @@ class AI(object):
         #min max
 
         begin_time=time()
-        self.__minmaxdecision(chessboard,-self.color,0)
+        self.__minmaxdecision(chessboard,-self.color,0,[])
         end_time=time()
         print(end_time-begin_time)
         print(self.candidate_list)
@@ -375,11 +405,11 @@ def readchessboard(filename,backstep=0):
 
 if __name__ == '__main__':
     # begin_time=time()
-    chessboard = readchessboard("testcase/chess_log_1_6_13_8.txt",6)
-    # chessboard = np.ones((15, 15))
-    # chessboard[:, ::2] = -1
-    # for i in range(0, 15, 4):
-    #     chessboard[i] = -chessboard[i]
-    # chessboard[3][5]=0
-    agent=AI(15,1,5)
+    # chessboard = readchessboard("testcase/chess_log_1_6_13_8.txt",6)
+    chessboard = np.ones((15, 15), dtype=np.int)
+    chessboard[:, ::2] = -1
+    for i in range(0, 15, 4):
+        chessboard[i] = -chessboard[i]
+    chessboard[1, 10] = 0
+    agent=AI(15,-1,5)
     agent.go(chessboard)
