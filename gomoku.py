@@ -394,7 +394,7 @@ class AI(object):
 
         begin_time=time()
 
-        LEVEL=10
+        LEVEL=6
         if self.__numofchess(chessboard)<=12:
             LEVEL=4
 
@@ -466,7 +466,7 @@ def readchessboard(filename,backstep=0):
 
 if __name__ == '__main__':
     # begin_time=time()
-    chessboard = readchessboard("testcase/chess_log10_1_6-8_6.txt",6)
+    chessboard = readchessboard("testcase/empty1.txt")
 
     agent=AI(15,1,5)
     agent.go(chessboard)
