@@ -10,8 +10,6 @@ SCORE_LEVEL=10
 SCORE = np.logspace(0,SCORE_LEVEL,SCORE_LEVEL+1,dtype=np.int64)
 #direction
 DIRECTION=((-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1))
-ITER=6
-LEVEL=3
 
 random.seed(0)
 #don't change the class name
@@ -25,7 +23,7 @@ class AI(object):
         # self.time_out = time_out
         # You need add your decision into your candidate_list. System will get the end of your candidate_list as your decision .
         self.candidate_list = []
-        self.ab=[-10*SCORE[SCORE_LEVEL]]*ITER
+        self.iterlist=[]
 # The input is current chessboard.
     def __printscoretable(self,scoretable):
         self.indent=np.math.log(10+np.max(scoretable),10)
@@ -144,7 +142,7 @@ class AI(object):
             if (x[0]<=borderAx-3 or x[0]>=borderBx+3 or x[1]>=borderBy+3 or x[1]<=borderAy-3):
                 continue
             octo=[[],[]]
-            if(x[0]==8 and x[1]==6):
+            if(x[0]==9 and x[1]==9):
                 asdfwef=10
             for i in range(8):
                 for color in [0,1]:
@@ -189,9 +187,9 @@ class AI(object):
                     #5 huoer 1
                     elif (self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],whatever,whatever],[[1],[2],[0,2],whatever]) or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],whatever,whatever],[[0],[2],[0,2],whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[2],whatever],[[1],[1],[2],whatever]) or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0,2],whatever],[[1],[1],[0,2],whatever]) or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],whatever,whatever],[[1],[1],[0],[1]]) or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0,2,-1,-2],whatever],[[0],[1],[0,2],whatever])
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0,2],whatever],[[0],[1],[0,2],whatever])
                         ):
                         numhuoer+=1+(octo[color][i]['neighbor']+octo[color][i+4]['neighbor'])*0.01
 
@@ -297,8 +295,9 @@ class AI(object):
                 (state2['score']>=state1['score']>=0.9*SCORE[SCORE_LEVEL] and state1['iter']==state2['iter'])):
                 return True
         return False
-    def __minmaxdecision(self,chessboard,thecolor,iter,list,ab):
-        max={}
+    def __minmaxdecision(self,chessboard,thecolor,iter,list,ab,ITER,LEVEL):
+
+        max={'score':-10*SCORE[SCORE_LEVEL]*self.color*thecolor,'iter':ITER+1}
         flag=0
         score = self.__score(chessboard,-thecolor)
         scoretable=score[0]
@@ -312,20 +311,20 @@ class AI(object):
         if (scoretable[pos]>=SCORE[SCORE_LEVEL] or iter>=ITER):
             # self.__printchessboard(chessboard)
             if iter==0:
-                self.candidate_list.append(pos)
+                self.iterlist.append(pos)
             # return ({'score':self.__scorechessboard(chessboard,self.color),'iter':iter+1})
             return ({'score':-scorechessboard*thecolor*self.color,'iter':iter+1})
         if (self.__numofspace(chessboard)==0):
             return ({'score':0,'iter':iter+1})
         else:
             t = 0
-            while (iter < ITER and t<=len(pos1dim)-1 and t<LEVEL and scoretable[pos]>=0):
+            while (iter < ITER and t<=len(pos1dim)-1 and t<LEVEL and scoretable[pos]>0):
                 # print(iter,pos)
                 ghostchessboard = chessboard.copy()
                 ghostchessboard[pos]=-thecolor
                 # self.__printchessboard(ghostchessboard)
                 list.append(pos)
-                result=self.__minmaxdecision(ghostchessboard,-thecolor,iter+1,list,ab)
+                result=self.__minmaxdecision(ghostchessboard,-thecolor,iter+1,list,max,ITER,LEVEL)
                 if pos==(1,9):
                     asdfas=234123
                 # print(list,result)
@@ -339,12 +338,11 @@ class AI(object):
                     max=result
                     flag=1
                     if iter==0:
-                        self.candidate_list.append(pos)
+                        self.iterlist.append(pos)
                 elif (self.__statecompare(result,max,-thecolor)):
                     max=result
-                    self.ab[iter]=max['score']
                     if iter==0:
-                        self.candidate_list.append(pos)
+                        self.iterlist.append(pos)
                 t+=1
                 pos=self.__get2dimposition(pos1dim[t])
             return (max)
@@ -355,6 +353,7 @@ class AI(object):
         # Clear candidate_list
         self.candidate_list.clear()
         self.__printchessboard(chessboard)
+
         #==================================================================
         #Write your algorithm here
         #Here is the simplest sample:Random decision
@@ -364,6 +363,7 @@ class AI(object):
         if len(idx)==self.chessboard_size**2:
             self.candidate_list.append((self.chessboard_size//2,self.chessboard_size//2))
             return
+        # self.__printscoretable(self.__score(chessboard,self.color)[0])
         #Not empty
         #At the early game------puyue
         idx = np.where(chessboard != COLOR_NONE)
@@ -391,10 +391,43 @@ class AI(object):
             pos=np.where(chessboard==0)
             self.candidate_list.append([pos[0][0],pos[1][0]])
             return
+
         begin_time=time()
-        self.__minmaxdecision(chessboard,-self.color,0,[],{'score':10*SCORE[SCORE_LEVEL],'iter':0})
-        end_time=time()
-        print(end_time-begin_time)
+
+        LEVEL=10
+        if self.__numofchess(chessboard)<=12:
+            LEVEL=4
+
+        max={'score':-10*SCORE[SCORE_LEVEL],'iter':21}
+        for ITER in range(2,6):
+            print(ITER)
+            begin_time=time()
+            self.iterlist.clear()
+            ITER*=2
+            flag=0
+            result=self.__minmaxdecision(chessboard,-self.color,0,[],{'score':10*SCORE[SCORE_LEVEL],'iter':0},ITER,LEVEL)
+            if flag==0:
+                max=result
+                self.candidate_list.append(self.iterlist[-1])
+                flag=1
+            elif self.__statecompare(result,max,self.color) and len(self.iterlist)!=0:
+                self.candidate_list.append(self.iterlist[-1])
+                max=result
+            end_time=time()
+            print(end_time-begin_time)
+            if max['score']>=0.9*SCORE[SCORE_LEVEL]:
+                end_time=time()
+                print(end_time-begin_time)
+                print(self.candidate_list)
+                return
+            if self.__numofchess(chessboard)<=12:
+                end_time=time()
+                print(end_time-begin_time)
+                print(self.candidate_list)
+                return
+
+
+
         print(self.candidate_list)
 
         # print("scoretable")
@@ -433,9 +466,7 @@ def readchessboard(filename,backstep=0):
 
 if __name__ == '__main__':
     # begin_time=time()
-    chessboard = readchessboard("testcase/chess_log_1_2_11_13.txt",2)
-    # chessboard = np.zeros((15, 15), dtype=np.int)
-    # chessboard[6,4]=-1
-    # chessboard[6,5:8]=1
+    chessboard = readchessboard("testcase/chess_log10_1_6-8_6.txt",6)
+
     agent=AI(15,1,5)
     agent.go(chessboard)
