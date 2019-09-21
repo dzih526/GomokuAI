@@ -11,7 +11,7 @@ SCORE = np.logspace(0,SCORE_LEVEL,SCORE_LEVEL+1,dtype=np.int64)
 #direction
 DIRECTION=((-1,0),(-1,1),(0,1),(1,1),(1,0),(1,-1),(0,-1),(-1,-1))
 ITER=6
-LEVEL=4
+LEVEL=3
 
 random.seed(0)
 #don't change the class name
@@ -56,8 +56,8 @@ class AI(object):
             print()
     #calculate octonumber, which helps to judge the pattern
     def __inbound(self,pos):
-        a=pos[0][0]
-        b=pos[1][0]
+        a=pos[0]
+        b=pos[1]
         if ((a>=0)and(a<self.chessboard_size)and(b>=0)and(b<self.chessboard_size)):
             return True
         return False
@@ -68,33 +68,33 @@ class AI(object):
         else:
             a=pos[0][0]+n*DIRECTION[drc][0]
             b=pos[1][0]+n*DIRECTION[drc][1]
-        return (([a],[b]))
+        return ((a,b))
     def __octonumber(self,chessboard,color,pos,drc):#color: the color of successive chess need to find
         octonumber={}
-        octonumber['neighbor'] = -2 if not self.__inbound(self.__nextpos(pos,drc,1)) else color*chessboard[self.__nextpos(pos,drc,1)][0]
+        octonumber['neighbor'] = -2 if not self.__inbound(self.__nextpos(pos,drc,1)) else color*chessboard[self.__nextpos(pos,drc,1)]
         octonumber['succ']=0
         n = 0
         st = 0
         if octonumber['neighbor']>=0:
             st = 2 if octonumber['neighbor'] == 0 else 1
-            while (self.__inbound(self.__nextpos(pos,drc,st+n)) and color*chessboard[self.__nextpos(pos,drc,st+n)][0]==1):
+            while (self.__inbound(self.__nextpos(pos,drc,st+n)) and color*chessboard[self.__nextpos(pos,drc,st+n)]==1):
                 n+=1
             octonumber['succ']=n
         octonumber['outter']=0
         if self.__inbound(self.__nextpos(pos,drc,st+n)):
-            octonumber['border']=color*chessboard[self.__nextpos(pos,drc,st+n)][0]
+            octonumber['border']=color*chessboard[self.__nextpos(pos,drc,st+n)]
             # jia 1?
             if (octonumber['border']==0 and self.__inbound(self.__nextpos(pos,drc,st+n+1))):
                 # octonumber['border']=2 if chessboard(self.__nextpos(pos,drc,st+n+1))[0]==0 else 1 if color*chessboard[self.__nextpos(pos,drc,st+n)][0]==1 else 0;
-                if chessboard[self.__nextpos(pos,drc,st+n+1)][0]==0:
+                if chessboard[self.__nextpos(pos,drc,st+n+1)]==0:
                     octonumber['border']=2
-                elif (color == chessboard[self.__nextpos(pos,drc,st+n+1)][0]):
+                elif (color == chessboard[self.__nextpos(pos,drc,st+n+1)]):
                     n2=1
-                    while (self.__inbound(self.__nextpos(pos,drc,st+n+n2+1))and color==chessboard[self.__nextpos(pos,drc,st+n+n2+1)][0]):
+                    while (self.__inbound(self.__nextpos(pos,drc,st+n+n2+1))and color==chessboard[self.__nextpos(pos,drc,st+n+n2+1)]):
                         n2+=1
                     octonumber['outter']=n2
                     if ((not self.__inbound(self.__nextpos(pos,drc,st+n+n2+1)) )or
-                       (self.__inbound(self.__nextpos(pos,drc,st+n+n2+1)) and chessboard[self.__nextpos(pos,drc,st+n+n2+1)][0]==-color)):
+                       (self.__inbound(self.__nextpos(pos,drc,st+n+n2+1)) and chessboard[self.__nextpos(pos,drc,st+n+n2+1)]==-color)):
                         octonumber['outter']=-octonumber['outter']
         else:
             octonumber['border']=-2#border: -1,border of board,opposite chess; 0, space; 1,space+1 fri; 2,2space;
@@ -144,7 +144,7 @@ class AI(object):
             if (x[0]<=borderAx-3 or x[0]>=borderBx+3 or x[1]>=borderBy+3 or x[1]<=borderAy-3):
                 continue
             octo=[[],[]]
-            if(x[0]==6 and x[1]==2):
+            if(x[0]==8 and x[1]==6):
                 asdfwef=10
             for i in range(8):
                 for color in [0,1]:
@@ -172,7 +172,7 @@ class AI(object):
                         if x not in waytosuccess[color]:
                             waytosuccess[color].append(x)
                     #3 huosan(lian)
-                    if ((octo[color][i]['neighbor']==0 and octo[color][i+4]['neighbor']==1 and octo[color][i+4]['border']>=0 and octo[color][i+4]['succ']==3) or
+                    elif ((octo[color][i]['neighbor']==0 and octo[color][i+4]['neighbor']==1 and octo[color][i+4]['border']>=0 and octo[color][i+4]['succ']==3) or
                         (octo[color][i+4]['neighbor']==0 and octo[color][i]['neighbor']==1 and octo[color][i]['border']>=0 and octo[color][i]['succ']==3)):
                         scoretable[x]+=SCORE[SCORE_LEVEL-color-2]
                         chessboardscore+=(color*(-2)+1)*SCORE[SCORE_LEVEL-2-color]
@@ -197,30 +197,34 @@ class AI(object):
 
                     #10 miansan 1
                     elif (self.__octojudger(octo[color][i],octo[color][i+4],[[1],[3],[-1,-2],whatever],[[0],whatever,whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[-1,-2],whatever],[[1],[1],[0],whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[-1,-2],whatever],[[1],[2],[0],whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[3],[0],whatever],[[-1,-2],[0],whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[-1,-2],whatever]  ,[[1],[1],[0,2],whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[-1,-2],whatever]  ,[[1],[2],[0,2],whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[3],[0,2],whatever],[[-1,-2],[0],whatever,whatever])or
+
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[3],whatever,whatever],[[-1,-2],[0],whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[0],[1],[-1,-2],whatever],[[1],[2],whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[-1]],[[1],[1],whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[0],[1],[-1,-2]  ,whatever],[[1],[2],whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[-1]],          [[1],[1],whatever,whatever])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[0],[-1]],[whatever,whatever,whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[2,-2]],[[-1,-2],[0],whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[0],[2],[0],whatever],[[1],[1],[-1,-2],whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[0],[2],[-1,-2],whatever],[[1],[1],[0],whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[0],[1,-1]],[[-1,-2],[0],whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[-2]],[[0],[0],whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[0],[1,-1]],[[-1,-2],[0],whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[-1,-2],whatever],[[1],[1],[0],[1,-1]])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[-1,-2],whatever],[[0],[1],whatever,whatever])or
+
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[2,-2]],    [[-1,-2],[0],whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[0],[2],whatever,whatever],    [[1],[1],[-1,-2],whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[0],[2],[-1,-2],whatever],  [[1],[1],whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[-2]],          [whatever,whatever,whatever,whatever])or
+
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[0],[1,-1]],    [[-1,-2],[0],whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[-1,-2],whatever],  [[1],[1],[0],[1,-1]])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[-1,-2],whatever],  [[0],[1],whatever,whatever])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[3],[-1,-2],whatever],[whatever,whatever,whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[2,-2]],[[0],[0],whatever,whatever]) or                        self.__octojudger(octo[color][i],octo[color][i+4],[[0],[2],whatever,whatever],[[1],[1],whatever,whatever])or
+
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[2,-2]],        [whatever,whatever,whatever,whatever]) or                        self.__octojudger(octo[color][i],octo[color][i+4],[[0],[2],whatever,whatever],[[1],[1],whatever,whatever])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[0],[3],whatever,whatever],[whatever,whatever,whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],whatever,whatever],[[0],[1],whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[1,-1]],[[1],[1],whatever,whatever])or
-                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[0],[1,-1]],[whatever,whatever,whatever,whatever])):
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],whatever,whatever], [[0],[1],whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[0],[1,-1]],        [[1],[1],whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[2],[0],[1,-1]],[whatever,whatever,whatever,whatever])or
+                        self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],whatever,whatever],[[0],[2],whatever,whatever])):
                         nummiansan+=1+(octo[color][i]['neighbor']+octo[color][i+4]['neighbor'])*0.01
 
-                    if (self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],[2],whatever],[[-1],[0],whatever,whatever])or
+                    elif (self.__octojudger(octo[color][i],octo[color][i+4],[[0],[0],[2],whatever],[[-1],[0],whatever,whatever])or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[1],[1],[-1],whatever],[[1],[1],[2],whatever]) or
                         self.__octojudger(octo[color][i],octo[color][i+4],[[-1],[0],whatever,whatever],[[1],[2],[2],whatever])):
                         nummianer+=1
@@ -429,15 +433,9 @@ def readchessboard(filename,backstep=0):
 
 if __name__ == '__main__':
     # begin_time=time()
-    chessboard = readchessboard("testcase/chess_log_1_6-7_6.txt",6)
+    chessboard = readchessboard("testcase/chess_log_1_2_11_13.txt",2)
     # chessboard = np.zeros((15, 15), dtype=np.int)
-    # chessboard[5:8, 4] = 1
-    # chessboard[8, 4] = -1
-    # chessboard[4:7, 9] = -1
-
-    # chessboard[:, ::2] = -1
-    # for i in range(0, 15, 4):
-    #     chessboard[i] = -chessboard[i]
-    # chessboard[12,4]=0
+    # chessboard[6,4]=-1
+    # chessboard[6,5:8]=1
     agent=AI(15,1,5)
     agent.go(chessboard)

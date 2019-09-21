@@ -62,8 +62,8 @@ class CodeCheck():
                     return False
         return True
 
-    def __check_go(self, chessboard):
-        self.agent = imp.load_source('AI', self.script_file_path).AI(self.chessboard_size, -1, self.time_out)
+    def __check_go(self, chessboard,color=-1):
+        self.agent = imp.load_source('AI', self.script_file_path).AI(self.chessboard_size, color, self.time_out)
         try:
             timeout(self.time_out)(self.agent.go)(np.copy(chessboard))
         except Exception:
@@ -71,8 +71,8 @@ class CodeCheck():
             return False
         return True
 
-    def __check_result(self, chessboard, result):
-        if not self.__check_go(chessboard):
+    def __check_result(self, chessboard, result,color=-1):
+        if not self.__check_go(chessboard,color):
             return False
         if not self.agent.candidate_list or \
             list(self.agent.candidate_list[-1]) not in result:
@@ -100,6 +100,30 @@ class CodeCheck():
             return False
 
         return True
+    def readchessboard(self,filename,backstep=0):
+        file = open(filename)
+        str = file.readlines()
+        chessboard = np.zeros((15,15), dtype=np.int)
+        tail=None if backstep==0 else -backstep
+        for pos in str[:tail]:
+            t=st=0
+            chess=[]
+            while st < len(pos):
+                if pos[st].isnumeric():
+                    flag=1
+                    if st-1>=0 and pos[st-1]=='-':
+                        flag=-1
+                    if st+2<=len(pos) and pos[st:st+2].isnumeric():
+                        chess.append(flag*int(pos[st:st+2]))
+                        st+=3
+                    else:
+                        chess.append(flag*int(pos[st]))
+                        st+=2
+                    t+=1
+                else:
+                    st+=1
+            chessboard[chess[0],chess[1]]=chess[2]
+        return chessboard
 
     def __check_advance_chessboard(self):
         #
@@ -163,4 +187,10 @@ class CodeCheck():
         if not self.__check_result(chessboard, [[2, 3]]):
             self.errorcase = 5
             return False
+
+        chessboard = self.readchessboard("testcase/chess_log10_1_6-8_6.txt",6)
+        if not self.__check_result(chessboard, [[8, 6]],1):
+            self.errorcase = 6
+            return False
+
         return True
