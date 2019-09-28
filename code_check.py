@@ -193,6 +193,11 @@ class CodeCheck():
             self.errorcase = 6
             return False
 
+        chessboard = self.readchessboard("testcase/chess_log_secure.txt",2)
+        if not self.__check_result(chessboard, [[4,9]],-1):
+            self.errorcase = 6
+            return False
+
 
         chessboard = self.readchessboard("testcase/chess_log_1_6_13_8.txt",6)
         if not self.__check_result(chessboard, [[13, 8],[10,11]],1):
@@ -200,7 +205,22 @@ class CodeCheck():
             return False
 
         chessboard = self.readchessboard("testcase/chess_log12_-1_6-7_12,11_8.txt",6)
-        if not self.__check_result(chessboard, [[7, 12],[11,8]],-1):
+        if not self.__check_result(chessboard, [[7, 12],[11,8],[4,10]],-1):
+            self.errorcase = 6
+            return
+
+        chessboard = self.readchessboard("testcase/chess_log15_1_6-8_4.txt",6)
+        if not self.__check_result(chessboard, [[8, 4]],-1):
+            self.errorcase = 6
+            return False
+
+        chessboard = self.readchessboard("testcase/chess_log17_-1_6-5_4.txt",6)
+        if not self.__check_result(chessboard, [[5, 4]],-1):
+            self.errorcase = 6
+            return False
+
+        chessboard = self.readchessboard("testcase/chess_log_secure.txt",2)
+        if not self.__check_result(chessboard, [[4, 9]],-1):
             self.errorcase = 6
             return False
 
