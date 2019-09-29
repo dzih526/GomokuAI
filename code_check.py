@@ -215,7 +215,7 @@ class CodeCheck():
             return False
 
         chessboard = self.readchessboard("testcase/chess_log17_-1_6-5_4.txt",6)
-        if not self.__check_result(chessboard, [[5, 4]],-1):
+        if not self.__check_result(chessboard, [[5, 4],[6,5]],-1):
             self.errorcase = 6
             return False
 

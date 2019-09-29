@@ -151,7 +151,7 @@ class AI(object):
             if (x[0] <= borderAx - 3 or x[0] >= borderBx + 3 or x[1] >= borderBy + 3 or x[1] <= borderAy - 3):
                 continue
             octo = [[], []]
-            if (x[0] == 5 and x[1] == 4):
+            if (x[0] == 8 and x[1] == 10):
                 asdfwef = 10
             for i in range(8):
                 for color in [0, 1]:
@@ -176,8 +176,8 @@ class AI(object):
                     # 2 huosi,chongsi
                     if ((octo[color][i]['neighbor'] == 1 and octo[color][i + 4]['neighbor'] == 1 and octo[color][i]['succ'] + octo[color][i + 4]['succ'] >= 4) or
                             ((octo[color][i]['neighbor'] == 1 and octo[color][i]['succ'] >= 4) or (octo[color][i + 4]['neighbor'] == 1 and octo[color][i + 4]['succ'] >= 4))):
-                        scoretable[x] += SCORE[SCORE_LEVEL - color]
-                        chessboardscore += (color * (-2) + 1) * SCORE[SCORE_LEVEL - color]
+                        scoretable[x] += SCORE[SCORE_LEVEL - color]*1.1
+                        chessboardscore += (color * (-2) + 1) * SCORE[SCORE_LEVEL - color]*1.1
                         if x not in waytosuccess[color]:
                             waytosuccess[color].append(x)
                     # 3 huosan(lian)
@@ -229,10 +229,11 @@ class AI(object):
 
                     elif (octo[color][i]['succ']+octo[color][i+4]['succ']==2 and (octo[color][i]['border']==-1 or octo[color][i+4]['border']==-1 or octo[color][i]['neighbor']==-1 or octo[color][i+4]['neighbor']==-1)):
                         nummianer += 1 + (octo[color][i]['neighbor'] + octo[color][i + 4]['neighbor']) * 0.01
-                    elif self.__octojudger(octo[color][i], octo[color][i + 4], [[-1,-2], [0], whatever, whatever], [[0], [0], [2], whatever]):
-                        nummianyi += 1
+                    elif (self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [1], [-1,-2], whatever], [[0], [0], [2], whatever])or
+                          self.__octojudger(octo[color][i], octo[color][i + 4], [[0], [1], [-1,-2], whatever], [[0], [0], [2], whatever])):
+                          nummianyi += 1
                     elif self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [1], [2], whatever], [[0], [0], whatever, whatever]):
-                        numhuoyi += 1
+                          numhuoyi += 1
 
                     # for j in [0,4]:
                     #     if (self.__octojudger2(octo[color][i+j],[[1],[1],[2],whatever])):
@@ -402,11 +403,17 @@ class AI(object):
 
         begin_time = time()
 
-        LEVEL = 9
+        LEVEL = 8
         MAX_ITER = 9
+        # if self.__numofchess(chessboard) <= 5:
+        #     LEVEL = 3
+        #     MAX_ITER = 4
         if self.__numofchess(chessboard) <= 10:
-            LEVEL = 3
-            MAX_ITER = 3
+            LEVEL = 5
+            MAX_ITER = 7
+        elif self.__numofchess(chessboard) >= 110:
+            LEVEL = 2
+            MAX_ITER = 4
 
         max = {'score': -10 * SCORE[SCORE_LEVEL], 'iter': 21}
         # Iterative Deepening
@@ -443,7 +450,10 @@ def readchessboard(filename, backstep=0):
     file = open(filename)
     str = file.readlines()
     chessboard = np.zeros((15, 15), dtype=np.int)
-    tail = None if backstep == 0 else -backstep
+    if backstep!=0:
+        tail = backstep
+    else:
+        tail = None
     for pos in str[:tail]:
         t = st = 0
         chess = []
@@ -467,7 +477,7 @@ def readchessboard(filename, backstep=0):
 
 if __name__ == '__main__':
     # begin_time=time()
-    chessboard = readchessboard("testcase/chess_log_secure.txt",2)
+    chessboard = readchessboard("testcase/chess_log.txt",21)
 
-    agent = AI(15, -1, 5)
+    agent = AI(15, 1, 5)
     agent.go(chessboard)

@@ -2,14 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f36c6abe-d9bb-4a1c-bf41-9a6af719ccdd" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/testcase/chess_log_secure.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/GomokuAI.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/GomokuAI.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/encodings.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/encodings.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/other.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/chess_log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/chess_log.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/code_check.py" beforeDir="false" afterPath="$PROJECT_DIR$/code_check.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/gomoku.py" beforeDir="false" afterPath="$PROJECT_DIR$/gomoku.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testcase/chess_log.txt" beforeDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -44,7 +40,7 @@
       </list>
     </option>
   </component>
-  <component name="RunManager" selected="Python.code_check_test">
+  <component name="RunManager" selected="Python.gomoku">
     <configuration name="&lt;template&gt;" type="WebApp" default="true" selected="false">
       <Host>localhost</Host>
       <Port>5050</Port>
@@ -139,8 +135,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.code_check_test" />
         <item itemvalue="Python.gomoku" />
+        <item itemvalue="Python.code_check_test" />
         <item itemvalue="Python.code_check" />
         <item itemvalue="Python.score_test" />
       </list>
@@ -159,7 +155,8 @@
       <workItem from="1569585866199" duration="57000" />
       <workItem from="1569585926338" duration="3228000" />
       <workItem from="1569590911897" duration="2697000" />
-      <workItem from="1569629851179" duration="19374000" />
+      <workItem from="1569629851179" duration="26538000" />
+      <workItem from="1569735389592" duration="1162000" />
     </task>
     <servers />
   </component>
@@ -189,8 +186,8 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/gomoku.py</url>
-          <line>338</line>
-          <option name="timeStamp" value="32" />
+          <line>154</line>
+          <option name="timeStamp" value="33" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
@@ -198,7 +195,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/GomokuAI$code_check.coverage" NAME="code_check Coverage Results" MODIFIED="1569662922291" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/GomokuAI$score_test.coverage" NAME="score_test Coverage Results" MODIFIED="1569638752169" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/GomokuAI$gomoku.coverage" NAME="gomoku Coverage Results" MODIFIED="1569664146988" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/GomokuAI$code_check_test.coverage" NAME="code_check_test Coverage Results" MODIFIED="1569664404532" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/GomokuAI$gomoku.coverage" NAME="gomoku Coverage Results" MODIFIED="1569735589030" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/GomokuAI$code_check_test.coverage" NAME="code_check_test Coverage Results" MODIFIED="1569665745299" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
