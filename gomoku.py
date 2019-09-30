@@ -227,7 +227,8 @@ class AI(object):
 
                             nummiansan += 1 + (octo[color][i]['neighbor'] + octo[color][i + 4]['neighbor']) * 0.01
 
-                    elif (octo[color][i]['succ']+octo[color][i+4]['succ']==2 and (octo[color][i]['border']==-1 or octo[color][i+4]['border']==-1 or octo[color][i]['neighbor']==-1 or octo[color][i+4]['neighbor']==-1)):
+                    elif (octo[color][i]['succ']+octo[color][i+4]['succ']==2 and (octo[color][i]['border']==-1 or octo[color][i+4]['border']==-1 or octo[color][i]['neighbor']==-1 or octo[color][i+4]['neighbor']==-1)
+                            and (not ((octo[color][i]['border']==-1 and octo[color][i]['neighbor']==-1) or (octo[color][i+4]['border']==-1 and octo[color][i+4]['neighbor']==-1)))):
                         nummianer += 1 + (octo[color][i]['neighbor'] + octo[color][i + 4]['neighbor']) * 0.01
                     elif (self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [1], [-1,-2], whatever], [[0], [0], [2], whatever])or
                           self.__octojudger(octo[color][i], octo[color][i + 4], [[0], [1], [-1,-2], whatever], [[0], [0], [2], whatever])):
@@ -378,22 +379,9 @@ class AI(object):
         idx = np.where(chessboard != COLOR_NONE)
         idx = list(zip(idx[0], idx[1]))
         ""
-        # if len(idx)==2:
-        #     me = np.where(chessboard == self.color)
-        #     opponent = np.where(chessboard == -self.color)
-        #     a=opponent[0][0]-me[0][0]
-        #     b=opponent[1][0]-me[1][0]
-        #     if a==0:
-        #         x=0
-        #         y=b
-        #     else:
-        #         y=int(((a**4+(a**2)*b**2)/(a**2+b**2))**(1/2))
-        #         x=int(b*y/a)
-        #         if (a*x+b*y!=0):
-        #             x=-x
-        #     if chessboard[me[0][0]+int(x)][me[1][0]+int(y)]==COLOR_NONE:
-        #         self.candidate_list.append((me[0][0]+x,me[1][0]+y))
-        #         return
+        if (len(idx)==3 and self.color==1 and chessboard[(7,7)]==chessboard[(9,7)]==-chessboard[(8,8)]==-1):
+            self.candidate_list.append((8,7))
+            return
 
         # min max
         if (self.__numofspace(chessboard) == 1):
@@ -405,15 +393,12 @@ class AI(object):
 
         LEVEL = 8
         MAX_ITER = 9
-        # if self.__numofchess(chessboard) <= 5:
-        #     LEVEL = 3
-        #     MAX_ITER = 4
-        if self.__numofchess(chessboard) <= 10:
+        if self.__numofchess(chessboard) <= 13:
             LEVEL = 5
-            MAX_ITER = 7
-        elif self.__numofchess(chessboard) >= 110:
-            LEVEL = 2
-            MAX_ITER = 4
+            MAX_ITER = 3
+        if self.__numofchess(chessboard) >= 110:
+            LEVEL = 4
+            MAX_ITER = 2
 
         max = {'score': -10 * SCORE[SCORE_LEVEL], 'iter': 21}
         # Iterative Deepening
@@ -477,7 +462,7 @@ def readchessboard(filename, backstep=0):
 
 if __name__ == '__main__':
     # begin_time=time()
-    chessboard = readchessboard("testcase/chess_log.txt",21)
+    chessboard = readchessboard("testcase/chess_log.txt",13)
 
     agent = AI(15, 1, 5)
     agent.go(chessboard)
