@@ -12,8 +12,6 @@ SCORE = np.logspace(0, SCORE_LEVEL, SCORE_LEVEL + 1, dtype=np.int64)
 DIRECTION = ((-1, 0), (-1, 1), (0, 1), (1, 1), (1, 0), (1, -1), (0, -1), (-1, -1))
 
 random.seed(0)
-
-
 # don't change the class name
 class AI(object):
     # chessboard_size, color, time_out passed from agent
@@ -23,7 +21,7 @@ class AI(object):
         self.candidate_list = []
         self.iterlist = []
 
-    # The input is current chessboard.
+    #Help in tests, show the scoretable
     def __printscoretable(self, scoretable):
         self.indent = np.math.log(10 + np.max(scoretable), 10)
         for line in scoretable:
@@ -31,6 +29,7 @@ class AI(object):
                 print(repr(element).rjust(int(self.indent) // 2 + 3), end=' ')
             print()
 
+    #Help in tests, show the chessboard
     def __printchessboard(self, chessboard):
         print("  ", end=" ")
         for i in range(len(chessboard)):
@@ -53,7 +52,7 @@ class AI(object):
                     print("  ", end=" ")
             print()
 
-    # calculate octonumber, which helps to judge the pattern
+    #Check whether this position valid or not
     def __inbound(self, pos):
         a = pos[0]
         b = pos[1]
@@ -61,6 +60,19 @@ class AI(object):
             return True
         return False
 
+    #Counts the number of chess
+    def __numofchess(self, chessboard):
+        idx = np.where(chessboard != COLOR_NONE)
+        idx = list(zip(idx[0], idx[1]))
+        return len(idx)
+
+    #count the number of space
+    def __numofspace(self, chessboard):
+        idx = np.where(chessboard == COLOR_NONE)
+        idx = list(zip(idx[0], idx[1]))
+        return len(idx)
+
+    #Return data of next n position of pos on direction drc
     def __nextpos(self, pos, drc, n):
         if type(pos[0]) == np.int64:
             a = pos[0] + n * DIRECTION[drc][0]
@@ -70,6 +82,7 @@ class AI(object):
             b = pos[1][0] + n * DIRECTION[drc][1]
         return ((a, b))
 
+    #Calculate octonumber, which helps to judge the pattern
     def __octonumber(self, chessboard, color, pos, drc):  # color: the color of successive chess need to find
         octonumber = {}
         octonumber['neighbor'] = -2 if not self.__inbound(self.__nextpos(pos, drc, 1)) else color * chessboard[self.__nextpos(pos, drc, 1)]
@@ -102,34 +115,25 @@ class AI(object):
             octonumber['border'] = -2  # border: -1,border of board,opposite chess; 0, space; 1,space+1 fri; 2,2space;
         return octonumber
 
-    def __octojudger(self, octo1, octo2, condition1, condition2):
-        # octo['neighbor','succ','border','outter']
-        if ((octo1['neighbor'] in condition1[0] and octo1['succ'] in condition1[1] and octo1['border'] in condition1[2] and octo1['outter'] in condition1[3] and
-             octo2['neighbor'] in condition2[0] and octo2['succ'] in condition2[1] and octo2['border'] in condition2[2] and octo2['outter'] in condition2[3]) or
-                (octo1['neighbor'] in condition2[0] and octo1['succ'] in condition2[1] and octo1['border'] in condition2[2] and octo1['outter'] in condition2[3] and
-                 octo2['neighbor'] in condition1[0] and octo2['succ'] in condition1[1] and octo2['border'] in condition1[2] and octo2['outter'] in condition1[3])):
-            return True
-        return False
-
-    def __octojudger2(self, octo, condition):
+    #Check whether octonumber octo meets the condition
+    def __octojudger(self, octo, condition):
         if (octo['neighbor'] in condition[0] and octo['succ'] in condition[1] and octo['border'] in condition[2] and octo['outter'] in condition[3]):
             return True
         return False
 
-    def __numofchess(self, chessboard):
-        idx = np.where(chessboard != COLOR_NONE)
-        idx = list(zip(idx[0], idx[1]))
-        return len(idx)
+    #Check whether octonumber octo1 and octo2 meet conditions symmetrically
+    def __octojudgerMirror(self, octo1, octo2, condition1, condition2):
+        # octo['neighbor','succ','border','outter']
+        if ((self.__octojudger(octo1,condition1) and self.__octojudger(octo2,condition2)) or
+           (self.__octojudger(octo1,condition2) and self.__octojudger(octo2,condition1))):
+            return True
+        return False
 
-    def __numofspace(self, chessboard):
-        idx = np.where(chessboard == COLOR_NONE)
-        idx = list(zip(idx[0], idx[1]))
-        return len(idx)
-
+    #Convert the postion from 1-D to 2-D
     def __get2dimposition(self, pos1dim):
         return ((pos1dim // self.chessboard_size, pos1dim % self.chessboard_size))
 
-    # score the empty position on the board
+    #Score the empty position on the board
     def __score(self, chessboard, thecolor):  ##aspect: 0 for differ chess, 1 for differ chessboard
         idx = np.where(chessboard != COLOR_NONE)
         borderAx = min(idx[0])
@@ -197,43 +201,43 @@ class AI(object):
                         if x not in waytosuccess[color]:
                             waytosuccess[color].append(x)
                     # 5 huoer 1
-                    elif (self.__octojudger(octo[color][i], octo[color][i + 4], [[0], [0], whatever, whatever], [[1], [2], [0, 2], whatever]) or
-                          self.__octojudger(octo[color][i], octo[color][i + 4], [[0], [0], whatever, whatever], [[0], [2], [0, 2], whatever]) or
-                          self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [1], [0, 2], whatever], [[1], [1], [0, 2], whatever]) or
-                          self.__octojudger(octo[color][i], octo[color][i + 4], [[0], [0], whatever, whatever], [[1], [1], [0], [1]]) or
-                          self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [1], [0, 2], whatever], [[0], [1], [0, 2], whatever])):
+                    elif (self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[0], [0], whatever, whatever], [[1], [2], [0, 2], whatever]) or
+                          self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[0], [0], whatever, whatever], [[0], [2], [0, 2], whatever]) or
+                          self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [1], [0, 2], whatever], [[1], [1], [0, 2], whatever]) or
+                          self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[0], [0], whatever, whatever], [[1], [1], [0], [1]]) or
+                          self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [1], [0, 2], whatever], [[0], [1], [0, 2], whatever])):
                           numhuoer += 1 + (octo[color][i]['neighbor'] + octo[color][i + 4]['neighbor']) * 0.01
                           if octo[color][i]['neighbor']==1 or octo[color][i+4]['neighbor']==1:
                                scoretable[x] += SCORE[SCORE_LEVEL - color - 7]
                                chessboardscore += (color * (-2) + 1) * SCORE[SCORE_LEVEL - 7 - color]
                     # 10 miansan 1
                             #01111
-                    elif   (self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [3], [-1, -2], whatever], [[0], whatever, whatever, whatever]) or
-                            self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [2], [-1, -2], whatever], [[1], [1], [0, 2], whatever]) or
-                            self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [1], [-1, -2], whatever], [[1], [2], [0, 2], whatever]) or
-                            self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [3], [0, 2], whatever], [[-1, -2], [0], whatever, whatever])):
+                    elif   (self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [3], [-1, -2], whatever], [[0], whatever, whatever, whatever]) or
+                            self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [2], [-1, -2], whatever], [[1], [1], [0, 2], whatever]) or
+                            self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [1], [-1, -2], whatever], [[1], [2], [0, 2], whatever]) or
+                            self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [3], [0, 2], whatever], [[-1, -2], [0], whatever, whatever])):
                             scoretable[x] += SCORE[SCORE_LEVEL - color - 6]
                             chessboardscore += (color * (-2) + 1) * SCORE[SCORE_LEVEL - 6 - color]
                             nummiansan += 1 + (octo[color][i]['neighbor'] + octo[color][i + 4]['neighbor']) * 0.01
 
                             #11_11
-                    elif(   self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [1], [0], [2, -2]], [whatever, whatever, whatever, whatever]) or
-                            self.__octojudger(octo[color][i], octo[color][i + 4], [[0], [2], whatever, whatever], [[1], [1], whatever, whatever]) or
-                            #1_111
-                            self.__octojudger(octo[color][i], octo[color][i + 4], [[0], [3], whatever, whatever], [whatever, whatever, whatever, whatever]) or
-                            self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [2], whatever, whatever], [[0], [1], whatever, whatever]) or
-                            self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [1], [0], [1, -1]], [[1], [1], whatever, whatever]) or
-                            self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [2], [0], [1, -1]], [whatever, whatever, whatever, whatever])):
+                    elif(self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [1], [0], [2, -2]], [whatever, whatever, whatever, whatever]) or
+                         self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[0], [2], whatever, whatever], [[1], [1], whatever, whatever]) or
+                         #1_111
+                         self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[0], [3], whatever, whatever], [whatever, whatever, whatever, whatever]) or
+                         self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [2], whatever, whatever], [[0], [1], whatever, whatever]) or
+                         self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [1], [0], [1, -1]], [[1], [1], whatever, whatever]) or
+                         self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [2], [0], [1, -1]], [whatever, whatever, whatever, whatever])):
 
                             nummiansan += 1 + (octo[color][i]['neighbor'] + octo[color][i + 4]['neighbor']) * 0.01
 
                     elif (octo[color][i]['succ']+octo[color][i+4]['succ']==2 and (octo[color][i]['border']==-1 or octo[color][i+4]['border']==-1 or octo[color][i]['neighbor']==-1 or octo[color][i+4]['neighbor']==-1)
                             and (not ((octo[color][i]['border']==-1 and octo[color][i]['neighbor']==-1) or (octo[color][i+4]['border']==-1 and octo[color][i+4]['neighbor']==-1)))):
                         nummianer += 1 + (octo[color][i]['neighbor'] + octo[color][i + 4]['neighbor']) * 0.01
-                    elif (self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [1], [-1,-2], whatever], [[0], [0], [2], whatever])or
-                          self.__octojudger(octo[color][i], octo[color][i + 4], [[0], [1], [-1,-2], whatever], [[0], [0], [2], whatever])):
+                    elif (self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [1], [-1, -2], whatever], [[0], [0], [2], whatever]) or
+                          self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[0], [1], [-1, -2], whatever], [[0], [0], [2], whatever])):
                           nummianyi += 1
-                    elif self.__octojudger(octo[color][i], octo[color][i + 4], [[1], [1], [2], whatever], [[0], [0], whatever, whatever]):
+                    elif self.__octojudgerMirror(octo[color][i], octo[color][i + 4], [[1], [1], [2], whatever], [[0], [0], whatever, whatever]):
                           numhuoyi += 1
 
                     # for j in [0,4]:
@@ -274,6 +278,7 @@ class AI(object):
         chessboardscore += self.__numofchess(chessboard)
         return ((scoretable, chessboardscore))
 
+    #Compare two state according to thecolor
     def __statecompare(self, state1, state2, thecolor):
         t = thecolor * self.color  # t=1 find max score,t=-1 find min score
         if t == 1:
@@ -296,6 +301,7 @@ class AI(object):
                 return True
         return False
 
+    #Minmax algorithm
     def __minmaxdecision(self, chessboard, thecolor, iter, list, ab, ITER, LEVEL):
         if (LEVEL-7*iter)>2 :
             LEVEL -= 7*iter
@@ -430,7 +436,7 @@ class AI(object):
             print(end_time - begin_time)
         print(self.candidate_list)
 
-
+#Help in tests, read chessboard data
 def readchessboard(filename, backstep=0):
     file = open(filename)
     str = file.readlines()
